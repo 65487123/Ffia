@@ -54,6 +54,7 @@ import org.apache.http.message.BasicNameValuePair;
  */
 public class HttpUtil {
 
+
     /**
      * get
      *
@@ -77,6 +78,7 @@ public class HttpUtil {
 
         return httpClient.execute(request);
     }
+
 
     /**
      * post form
@@ -115,6 +117,7 @@ public class HttpUtil {
         return httpClient.execute(request);
     }
 
+
     /**
      * Post String
      *
@@ -144,6 +147,7 @@ public class HttpUtil {
 
         return httpClient.execute(request);
     }
+
 
     /**
      * Post stream
@@ -175,6 +179,7 @@ public class HttpUtil {
         return httpClient.execute(request);
     }
 
+
     /**
      * Put String
      *
@@ -204,6 +209,7 @@ public class HttpUtil {
 
         return httpClient.execute(request);
     }
+
 
     /**
      * Put stream
@@ -235,6 +241,7 @@ public class HttpUtil {
         return httpClient.execute(request);
     }
 
+
     /**
      * Delete
      *
@@ -259,6 +266,7 @@ public class HttpUtil {
 
         return httpClient.execute(request);
     }
+
 
     private static String buildUrl(String host, String path, Map<String, String> querys) throws UnsupportedEncodingException {
         StringBuilder sbUrl = new StringBuilder();
@@ -291,6 +299,7 @@ public class HttpUtil {
         return sbUrl.toString();
     }
 
+
     private static HttpClient wrapClient(String host) {
         HttpClient httpClient = new DefaultHttpClient();
         if (host.startsWith("https://")) {
@@ -299,6 +308,7 @@ public class HttpUtil {
 
         return httpClient;
     }
+
 
     private static void sslClient(HttpClient httpClient) {
         try {
