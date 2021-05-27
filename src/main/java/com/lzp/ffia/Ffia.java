@@ -123,6 +123,10 @@ public class Ffia {
         }
     }
 
+
+    /**
+     * 判断是否已达到需要加注的点
+     */
     private boolean notificationPointReached() throws Exception {
         //不需要那么精确,所以就不用BigDecimal了
         return GetFundInfoUtil.getCurrentNetWorthOfFund(FUND_CODE) < benchmarkNetWorth * NOTIFICATION_POINT;
