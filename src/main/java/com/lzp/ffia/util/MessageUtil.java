@@ -33,8 +33,8 @@ public class MessageUtil {
     public static void sentMessage(String telephoneNumber, String code) {
         String host = "http://yzx.market.alicloudapi.com";
         String path = "/yzx/sendSms";
-        //这个appcode是买的,我做了修改。如果需要,可以自己买。
-        String appcode = "8f5551199e124074aec141f86b148236";
+        //这个appcode是买的,这里我做了修改。如果需要,可以自己买。
+        String appcode = "8f5551199e124307ec141f86b148236";
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "APPCODE " + appcode);
         Map<String, String> querys = new HashMap<>();

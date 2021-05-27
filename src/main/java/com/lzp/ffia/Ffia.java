@@ -16,6 +16,11 @@
 
 package com.lzp.ffia;
 
+import com.lzp.ffia.util.GetFundInfoUtil;
+import com.lzp.ffia.util.MessageUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,6 +35,7 @@ import java.util.List;
  */
 public class Ffia {
 
+    private final Logger LOGGER = LoggerFactory.getLogger(Ffia.class);
     /**
      * 每月定投日(1-28)
      */
@@ -43,7 +49,7 @@ public class Ffia {
     /**
      * 每月加仓次数
      */
-    private final short TIME_OF_INCREASE_IN_MONTH;
+    private final short TIME_OF_INCREASE_EVERY_MONTH;
 
     /**
      * 短信要发送给的手机号码
@@ -54,13 +60,28 @@ public class Ffia {
     /**
      * 当月定投确认份额时的基金净值,每月定投日会刷新
      */
-    private double benchmarkNetWorth;
+    private double benchmarkNetWorth = 2.0;
 
-    public Ffia(short MONTHLY_FIXED_INVESTMENTDAY, short TIME_OF_INCREASE_IN_MONTH, String FUND_CODE, String PHONE_NUMBER) {
+    /**
+     * 当月加注次数
+     */
+    private short timesOfRaisesThisMonth;
+
+
+    /**
+     * 需要发短信通知的点,定投当日确认份额后的净值的百分比。
+     * <p>
+     * 比如如果设为0.9998,当查出来的净值低于定投当日的净值的0.9998就会发短信
+     */
+    private final double NOTIFICATION_POINT;
+
+    public Ffia(short MONTHLY_FIXED_INVESTMENTDAY, short TIME_OF_INCREASE_EVERY_MONTH,
+                String FUND_CODE, String PHONE_NUMBER, double NOTIFICATION_POINT) {
         this.MONTHLY_FIXED_INVESTMENTDAY = MONTHLY_FIXED_INVESTMENTDAY;
         this.FUND_CODE = FUND_CODE;
-        this.TIME_OF_INCREASE_IN_MONTH = TIME_OF_INCREASE_IN_MONTH;
+        this.TIME_OF_INCREASE_EVERY_MONTH = TIME_OF_INCREASE_EVERY_MONTH;
         this.PHONE_NUMBER = PHONE_NUMBER;
+        this.NOTIFICATION_POINT = NOTIFICATION_POINT;
     }
 
     /**
@@ -69,25 +90,57 @@ public class Ffia {
      * 每发送一次短信就默认短信接收人已经去加仓了。如果当月加仓次数满了,则这个月不会再发送
      */
     public void start() {
-        List<Short> dayHourMinAndSec = getCurrentNumOfDaysInMonth();
-        if (dayHourMinAndSec.get(0) == MONTHLY_FIXED_INVESTMENTDAY) {
-
-        } else {
-
+        LOGGER.info("assistance successfully launched");
+        for (; ; ) {
+            sleepAndExecuteCoreLogic();
         }
+    }
+
+
+    /**
+     * 睡到14.55并执行基金定投辅助核心逻辑
+     */
+    private void sleepAndExecuteCoreLogic() {
+        List<Short> dayHourMinAndSec = getCurrentNumOfDaysInMonth();
+        try {
+            sleepUntilSixToClosingPoint(dayHourMinAndSec.get(1), dayHourMinAndSec.get(2), dayHourMinAndSec.get(3));
+            //已经睡到这一天的14.55了。或者项目启动时候就已经14.55-15.00之间了
+            if (dayHourMinAndSec.get(0) == MONTHLY_FIXED_INVESTMENTDAY) {
+                Thread.sleep(3600);
+                this.benchmarkNetWorth = GetFundInfoUtil.getCurrentNetWorthOfFund(FUND_CODE);
+            } else {
+                if ((timesOfRaisesThisMonth < TIME_OF_INCREASE_EVERY_MONTH) && notificationPointReached()) {
+                    MessageUtil.sentMessage(PHONE_NUMBER, FUND_CODE);
+                    timesOfRaisesThisMonth++;
+                }
+            }
+            //睡20个小时,睡醒后就是第二天啦
+            Thread.sleep(20 * 3600);
+        } catch (InterruptedException e) {
+            sleepAndExecuteCoreLogic();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private boolean notificationPointReached() throws Exception {
+        //不需要那么精确,所以就不用BigDecimal了
+        return GetFundInfoUtil.getCurrentNetWorthOfFund(FUND_CODE) < benchmarkNetWorth * NOTIFICATION_POINT;
     }
 
 
     /**
      * 休眠到当天14.55
      */
-    private void sleepUntilSixToClosingPoint(short curHour,short curMin,short curSec) throws InterruptedException {
-        if (curHour>14){
-            Thread.sleep((24-curHour)*3600+1);
-        }else if (curHour==14){
-            
+    private void sleepUntilSixToClosingPoint(short curHour, short curMin, short curSec) throws InterruptedException {
+        if (curHour > 14) {
+            //睡到第二天
+            Thread.sleep((24 - curHour) * 3600 + 1);
+            sleepAndExecuteCoreLogic();
+        } else if (curHour == 14 && curMin >= 55) {
+            return;
         }
-        Thread.sleep(((14-curHour)*3600)+((55-curMin)*60)-curHour);
+        Thread.sleep(((14 - curHour) * 3600) + ((55 - curMin) * 60) - curSec);
     }
 
     /**
@@ -103,7 +156,6 @@ public class Ffia {
         dayHourMinAndSec.add(Short.parseShort(formatter.format(date).substring(17, 19)));
         return dayHourMinAndSec;
     }
-
 
 
 }

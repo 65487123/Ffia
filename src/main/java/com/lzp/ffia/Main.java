@@ -16,9 +16,7 @@
 
 package com.lzp.ffia;
 
-import com.lzp.ffia.util.GetFundInfoUtil;
-import com.lzp.ffia.util.HttpUtil;
-import com.lzp.ffia.util.MessageUtil;
+
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
@@ -32,9 +30,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class Main {
     public static void main(String[] args) throws Exception {
-        //MessageUtil.sentMessage("17348846527","020011");
-        //double d =GetFundInfoUtil.getCurrentNetWorthOfFund("020011");
-        //new Ffia((short)1,(short)4,"020011","17348846527").start();
-        System.out.println(((14-12)*3600)+((55-56)*60)-22);
+        new Ffia((short) 1, (short) 4, "020011", "17348846527", 0.9998).start();
     }
 }
