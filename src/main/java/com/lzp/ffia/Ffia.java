@@ -35,7 +35,13 @@ import java.util.List;
  */
 public class Ffia {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(Ffia.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Ffia.class);
+
+    /**
+     * 每天的收盘时刻,这个常量用作判断当日是否是交易日
+     */
+    private static final String CLOSING_MOMENT = "15:00";
+
     /**
      * 每月定投日(1-28)
      */
@@ -58,30 +64,33 @@ public class Ffia {
 
 
     /**
-     * 当月定投确认份额时的基金净值,每月定投日会刷新
+     * 触发短信通知的点(净值低于这个点,会发短信通知加仓)
+     * <p>
+     * 等于当月定投确认份额时的基金净值乘以PERCENTAGE_OF_TIME_OF_FI,
+     * <p>
+     * 每月定投份额确认日会刷新
      */
-    private double benchmarkNetWorth = 2.0;
+    private double notificationPoint = 2.0;
 
     /**
      * 当月加注次数
      */
-    private short timesOfRaisesThisMonth;
-
+    private short timesOfRaisesThisMonth = 0;
 
     /**
-     * 需要发短信通知的点,定投当日确认份额后的净值的百分比。
+     * 定投当日确认份额后的净值的百分比。低于这个百分比会发短信通知
      * <p>
-     * 比如如果设为0.9998,当查出来的净值低于定投当日的净值的0.9998就会发短信
+     * 比如如果设为0.9998,当查出来的净值低于定投当日份额确认后的净值的0.9998就会发短信
      */
-    private final double NOTIFICATION_POINT;
+    private final double PERCENTAGE_OF_TIME_OF_FI;
 
     public Ffia(short MONTHLY_FIXED_INVESTMENTDAY, short TIME_OF_INCREASE_EVERY_MONTH,
-                String FUND_CODE, String PHONE_NUMBER, double NOTIFICATION_POINT) {
+                String FUND_CODE, String PHONE_NUMBER, double PERCENTAGE_OF_TIME_OF_FI) {
         this.MONTHLY_FIXED_INVESTMENTDAY = MONTHLY_FIXED_INVESTMENTDAY;
         this.FUND_CODE = FUND_CODE;
         this.TIME_OF_INCREASE_EVERY_MONTH = TIME_OF_INCREASE_EVERY_MONTH;
         this.PHONE_NUMBER = PHONE_NUMBER;
-        this.NOTIFICATION_POINT = NOTIFICATION_POINT;
+        this.PERCENTAGE_OF_TIME_OF_FI = PERCENTAGE_OF_TIME_OF_FI;
     }
 
     /**
@@ -106,8 +115,10 @@ public class Ffia {
             sleepUntilSixToClosingPoint(dayHourMinAndSec.get(1), dayHourMinAndSec.get(2), dayHourMinAndSec.get(3));
             //已经睡到这一天的14.55了。或者项目启动时候就已经14.55-15.00之间了
             if (dayHourMinAndSec.get(0) == MONTHLY_FIXED_INVESTMENTDAY) {
-                Thread.sleep(3600);
-                this.benchmarkNetWorth = GetFundInfoUtil.getCurrentNetWorthOfFund(FUND_CODE);
+                Thread.sleep(3600000);
+                //不需要那么精确,所以就不用BigDecimal了
+                this.notificationPoint = GetFundInfoUtil.getCurrentNetWorthOfFund(FUND_CODE) * PERCENTAGE_OF_TIME_OF_FI;
+                timesOfRaisesThisMonth = 0;
             } else {
                 if ((timesOfRaisesThisMonth < TIME_OF_INCREASE_EVERY_MONTH) && notificationPointReached()) {
                     MessageUtil.sentMessage(PHONE_NUMBER, FUND_CODE);
@@ -115,7 +126,7 @@ public class Ffia {
                 }
             }
             //睡20个小时,睡醒后就是第二天啦
-            Thread.sleep(20 * 3600);
+            Thread.sleep(20 * 3600000);
         } catch (InterruptedException e) {
             sleepAndExecuteCoreLogic();
         } catch (Exception e) {
@@ -128,8 +139,9 @@ public class Ffia {
      * 判断是否已达到需要加注的点
      */
     private boolean notificationPointReached() throws Exception {
-        //不需要那么精确,所以就不用BigDecimal了
-        return GetFundInfoUtil.getCurrentNetWorthOfFund(FUND_CODE) < benchmarkNetWorth * NOTIFICATION_POINT;
+        double latestNetWorth = GetFundInfoUtil.getCurrentNetWorthOfFund(FUND_CODE);
+        return (!CLOSING_MOMENT.equals(GetFundInfoUtil.getGztimeOfLastGetNetWorth()))
+                && (latestNetWorth < notificationPoint);
     }
 
 
@@ -139,12 +151,11 @@ public class Ffia {
     private void sleepUntilSixToClosingPoint(short curHour, short curMin, short curSec) throws InterruptedException {
         if (curHour > 14) {
             //睡到第二天
-            Thread.sleep((24 - curHour) * 3600 + 1);
+            Thread.sleep((24 - curHour) * 3600000 + 1000);
             sleepAndExecuteCoreLogic();
-        } else if (curHour == 14 && curMin >= 55) {
-            return;
+        } else if (curHour < 14 || curMin < 55) {
+            Thread.sleep(((14 - curHour) * 3600000) + ((55 - curMin) * 60000) - (curSec * 1000));
         }
-        Thread.sleep(((14 - curHour) * 3600) + ((55 - curMin) * 60) - curSec);
     }
 
     /**

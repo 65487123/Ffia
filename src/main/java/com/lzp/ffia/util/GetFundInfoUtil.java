@@ -29,15 +29,35 @@ import java.util.HashMap;
  */
 public class GetFundInfoUtil {
 
+
+    /**
+     * Description:最后一次获取的基金净值的净值截止日期。设置这个属性是为了避免二次http请求
+     */
+    private static String gztimeOfLastGetNetWorth;
+
     public static double getCurrentNetWorthOfFund(String fundCode) throws Exception {
         HttpResponse httpResponse = HttpUtil.doGet("http://fundgz.1234567.com.cn", "/js/"
                 + fundCode + ".js", new HashMap<>(16), new HashMap<>(16));
         String[] strings = EntityUtils.toString(httpResponse.getEntity()).split(",");
+        double netWorth = 0;
         for (String string : strings) {
             if (string.startsWith("\"gsz\":\"")) {
-                return Double.parseDouble(string.substring(7, string.length() - 1));
+                netWorth = Double.parseDouble(string.substring(7, string.length() - 1));
+            } else if (string.startsWith("\"gztime\"")) {
+                gztimeOfLastGetNetWorth = string.substring(21, 26);
             }
         }
-        throw new RuntimeException("cannot get net worth");
+        if (netWorth == 0) {
+            throw new RuntimeException("get net worth failed");
+        } else {
+            return netWorth;
+        }
     }
+
+    public static String getGztimeOfLastGetNetWorth() {
+        return gztimeOfLastGetNetWorth;
+    }
+
+
+
 }

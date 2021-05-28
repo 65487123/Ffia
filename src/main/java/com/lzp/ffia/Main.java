@@ -17,6 +17,7 @@
 package com.lzp.ffia;
 
 
+import com.lzp.ffia.util.GetFundInfoUtil;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 

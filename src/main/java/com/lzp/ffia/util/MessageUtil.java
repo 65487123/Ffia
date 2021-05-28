@@ -17,7 +17,6 @@
 package com.lzp.ffia.util;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
 
 import java.util.HashMap;
 import java.util.Map;
