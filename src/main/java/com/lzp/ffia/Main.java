@@ -18,7 +18,13 @@ package com.lzp.ffia;
 
 
 import com.lzp.ffia.util.GetFundInfoUtil;
+import com.lzp.ffia.util.ThreadFactoryImpl;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -31,6 +37,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class Main {
     public static void main(String[] args) throws Exception {
-        new Ffia((short) 1, (short) 4, "020011", "17348846527", 0.9998).start();
+        ExecutorService threadPool = new ThreadPoolExecutor(2, 2, 0,
+                TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("ffia"));
+        threadPool.execute(() -> new Ffia((short) 1, (short) 1, "020011",
+                "17348846527", 0.9998).start());
+        threadPool.execute(() -> new Ffia((short) 1, (short) 1, "501036",
+                "17348846527", 0.9998).start());
     }
 }
