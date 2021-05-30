@@ -44,8 +44,6 @@ public class MessageUtil {
 
         try {
             HttpResponse response = HttpUtil.doPost(host, path, headers, querys, bodys);
-            System.out.println(response.toString());
-            //获取response的body
         } catch (Exception e) {
             e.printStackTrace();
         }

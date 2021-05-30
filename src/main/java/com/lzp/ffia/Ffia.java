@@ -115,7 +115,7 @@ public class Ffia {
     private void sleepAndExecuteCoreLogic() {
         List<Short> dayHourMinAndSec = getCurrentNumOfDaysInMonth();
         try {
-            sleepUntilSixToClosingPoint(dayHourMinAndSec.get(1), dayHourMinAndSec.get(2), dayHourMinAndSec.get(3));
+            sleepTillTwoFiftyFive(dayHourMinAndSec.get(1), dayHourMinAndSec.get(2), dayHourMinAndSec.get(3));
             //已经睡到这一天的14.55了。或者项目启动时候就已经14.55-15.00之间了
             if (dayHourMinAndSec.get(0) == MONTHLY_FIXED_INVESTMENTDAY) {
                 Thread.sleep(3600000);
@@ -151,7 +151,7 @@ public class Ffia {
     /**
      * 休眠到当天14.55
      */
-    private void sleepUntilSixToClosingPoint(short curHour, short curMin, short curSec) throws InterruptedException {
+    private void sleepTillTwoFiftyFive(short curHour, short curMin, short curSec) throws InterruptedException {
         if (curHour > 14) {
             //睡到第二天
             Thread.sleep((24 - curHour) * 3600000 + 1000);

@@ -21,7 +21,9 @@
  * @date: 2021/5/27 17:59
  */
 public class Test {
-    public static void main(String[] args) {
 
+    @org.junit.Test
+    public void test() {
     }
+
 }
