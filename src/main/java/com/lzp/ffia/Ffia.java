@@ -166,12 +166,12 @@ public class Ffia {
      */
     private List<Short> getCurrentNumOfDaysInMonth() {
         List<Short> dayHourMinAndSec = new ArrayList<>();
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-        Date date = new Date(System.currentTimeMillis());
-        dayHourMinAndSec.add(Short.parseShort(formatter.format(date).substring(8, 10)));
-        dayHourMinAndSec.add(Short.parseShort(formatter.format(date).substring(11, 13)));
-        dayHourMinAndSec.add(Short.parseShort(formatter.format(date).substring(14, 16)));
-        dayHourMinAndSec.add(Short.parseShort(formatter.format(date).substring(17, 19)));
+        String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z")
+                .format(new Date(System.currentTimeMillis()));
+        dayHourMinAndSec.add(Short.parseShort(time.substring(8, 10)));
+        dayHourMinAndSec.add(Short.parseShort(time.substring(11, 13)));
+        dayHourMinAndSec.add(Short.parseShort(time.substring(14, 16)));
+        dayHourMinAndSec.add(Short.parseShort(time.substring(17, 19)));
         return dayHourMinAndSec;
     }
 
