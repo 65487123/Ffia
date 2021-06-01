@@ -119,6 +119,7 @@ public class Ffia {
             //已经睡到这一天的14.55了。或者项目启动时候就已经14.55-15.00之间了
             if (dayHourMinAndSec.get(0) == MONTHLY_FIXED_INVESTMENTDAY) {
                 Thread.sleep(3600000);
+                LOGGER.info("refresh notificationPoint");
                 //不需要那么精确,所以就不用BigDecimal了
                 this.notificationPoint = GetFundInfoUtil.getCurrentNetWorthOfFund(FUND_CODE) * PERCENTAGE_OF_TIME_OF_FI;
                 timesOfRaisesThisMonth = 0;
