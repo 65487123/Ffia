@@ -56,9 +56,9 @@ public class Ffia {
     private final String FUND_CODE;
 
     /**
-     * 每月加仓次数
+     * 本月是否已经加仓
      */
-    private final short TIME_OF_INCREASE_EVERY_MONTH;
+    private boolean alreadyIncreasedThisMonth;
 
     /**
      * 短信要发送给的手机号码
@@ -73,12 +73,7 @@ public class Ffia {
      * <p>
      * 每月定投份额确认日会刷新
      */
-    private double notificationPoint = 2.0;
-
-    /**
-     * 当月加注次数
-     */
-    private short timesOfRaisesThisMonth = 0;
+    private double notificationPoint = 1.073;
 
     /**
      * 定投当日确认份额后的净值的百分比。低于这个百分比会发短信通知
@@ -87,11 +82,10 @@ public class Ffia {
      */
     private final double PERCENTAGE_OF_TIME_OF_FI;
 
-    public Ffia(short MONTHLY_FIXED_INVESTMENTDAY, short TIME_OF_INCREASE_EVERY_MONTH,
-                String FUND_CODE, String PHONE_NUMBER, double PERCENTAGE_OF_TIME_OF_FI) {
+    public Ffia(short MONTHLY_FIXED_INVESTMENTDAY, String FUND_CODE,
+                String PHONE_NUMBER, double PERCENTAGE_OF_TIME_OF_FI) {
         this.MONTHLY_FIXED_INVESTMENTDAY = MONTHLY_FIXED_INVESTMENTDAY;
         this.FUND_CODE = FUND_CODE;
-        this.TIME_OF_INCREASE_EVERY_MONTH = TIME_OF_INCREASE_EVERY_MONTH;
         this.PHONE_NUMBER = PHONE_NUMBER;
         this.PERCENTAGE_OF_TIME_OF_FI = PERCENTAGE_OF_TIME_OF_FI;
     }
@@ -122,11 +116,11 @@ public class Ffia {
                 LOGGER.info("refresh notificationPoint");
                 //不需要那么精确,所以就不用BigDecimal了
                 this.notificationPoint = GetFundInfoUtil.getCurrentNetWorthOfFund(FUND_CODE) * PERCENTAGE_OF_TIME_OF_FI;
-                timesOfRaisesThisMonth = 0;
+                alreadyIncreasedThisMonth = false;
             } else {
-                if ((timesOfRaisesThisMonth < TIME_OF_INCREASE_EVERY_MONTH) && notificationPointReached()) {
+                if ((!alreadyIncreasedThisMonth) && notificationPointReached()) {
                     MessageUtil.sentMessage(PHONE_NUMBER, FUND_CODE);
-                    timesOfRaisesThisMonth++;
+                    alreadyIncreasedThisMonth = true;
                 }
             }
             //睡20个小时,睡醒后就是第二天啦

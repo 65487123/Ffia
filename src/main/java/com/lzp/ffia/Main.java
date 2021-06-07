@@ -39,9 +39,9 @@ public class Main {
     public static void main(String[] args) throws Exception {
         ExecutorService threadPool = new ThreadPoolExecutor(2, 2, 0,
                 TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("ffia"));
-        threadPool.execute(() -> new Ffia((short) 1, (short) 1, "020011",
+        threadPool.execute(() -> new Ffia((short) 1, "020011",
                 "15088753388", 0.9998).start());
-        threadPool.execute(() -> new Ffia((short) 1, (short) 1, "202211",
+        threadPool.execute(() -> new Ffia((short) 1, "202211",
                 "15088753388", 0.9998).start());
     }
 }
