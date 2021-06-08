@@ -40,8 +40,8 @@ public class Main {
         ExecutorService threadPool = new ThreadPoolExecutor(2, 2, 0,
                 TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("ffia"));
         threadPool.execute(() -> new Ffia((short) 1, "020011",
-                "15088753388", 0.9998).start());
+                "15088753387", 0.9998).start());
         threadPool.execute(() -> new Ffia((short) 1, "202211",
-                "15088753388", 0.9998).start());
+                "15088753387", 0.9998).start());
     }
 }

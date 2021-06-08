@@ -16,7 +16,8 @@
 
 package com.lzp.ffia.util;
 
-import org.apache.http.HttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +29,8 @@ import java.util.Map;
  * @date: 2021/5/27 15:24
  */
 public class MessageUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageUtil.class);
 
     public static void sentMessage(String telephoneNumber, String code) {
         String host = "http://yzx.market.alicloudapi.com";
@@ -43,7 +46,8 @@ public class MessageUtil {
         Map<String, String> bodys = new HashMap<>();
 
         try {
-            HttpResponse response = HttpUtil.doPost(host, path, headers, querys, bodys);
+            HttpUtil.doPost(host, path, headers, querys, bodys);
+            LOGGER.info("成功向{}f发送短信", telephoneNumber);
         } catch (Exception e) {
             e.printStackTrace();
         }
