@@ -47,7 +47,7 @@ public class MessageUtil {
 
         try {
             HttpUtil.doPost(host, path, headers, querys, bodys);
-            LOGGER.info("成功向{}f发送短信", telephoneNumber);
+            LOGGER.info("成功向{}发送短信", telephoneNumber);
         } catch (Exception e) {
             e.printStackTrace();
         }

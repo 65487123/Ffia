@@ -73,7 +73,7 @@ public class Ffia {
      * <p>
      * 每月定投份额确认日会刷新
      */
-    private double notificationPoint = 1.073;
+    private double notificationPoint = 1.0692;
 
     /**
      * 定投当日确认份额后的净值的百分比。低于这个百分比会发短信通知
