@@ -37,13 +37,12 @@ import java.util.List;
  * 所以这个基金定投辅助类是只针对一个基金的。
  * 如果要非同时服务多个基金,那就开多线程,每个线程跑一个定投辅助。
  *
- *
  * @author: Zeping Lu
  * @date: 2021/5/27 16:49
  */
 public class Ffia {
 
-    public static class PercentageForValuations{
+    public static class PercentageForValuations {
         private double percentageForMid;
         private double percentageForLow;
         private double percentageForHigh;
