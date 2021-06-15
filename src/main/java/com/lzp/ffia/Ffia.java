@@ -16,14 +16,19 @@
 
 package com.lzp.ffia;
 
+import com.alibaba.fastjson.JSONObject;
 import com.lzp.ffia.util.GetFundInfoUtil;
+import com.lzp.ffia.util.HttpUtil;
 import com.lzp.ffia.util.MessageUtil;
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -37,6 +42,18 @@ import java.util.List;
  * @date: 2021/5/27 16:49
  */
 public class Ffia {
+
+    public static class PercentageForValuations{
+        private double percentageForMid;
+        private double percentageForLow;
+        private double percentageForHigh;
+
+        public PercentageForValuations(double percentageForMid, double percentageForLow, double percentageForHigh) {
+            this.percentageForMid = percentageForMid;
+            this.percentageForLow = percentageForLow;
+            this.percentageForHigh = percentageForHigh;
+        }
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Ffia.class);
 
@@ -54,6 +71,11 @@ public class Ffia {
      * 基金代码
      */
     private final String FUND_CODE;
+
+    /**
+     * 指数代码,查估值时会用到
+     */
+    private final String INDEX_CODE;
 
     /**
      * 本月是否已经加仓
@@ -80,12 +102,13 @@ public class Ffia {
      * <p>
      * 比如如果设为0.9998,当查出来的净值低于定投当日份额确认后的净值的0.9998就会发短信
      */
-    private final double PERCENTAGE_OF_TIME_OF_FI;
+    private final PercentageForValuations PERCENTAGE_OF_TIME_OF_FI;
 
     public Ffia(short MONTHLY_FIXED_INVESTMENTDAY, String FUND_CODE,
-                String PHONE_NUMBER, double PERCENTAGE_OF_TIME_OF_FI) {
+                String index_code, String PHONE_NUMBER, PercentageForValuations PERCENTAGE_OF_TIME_OF_FI) {
         this.MONTHLY_FIXED_INVESTMENTDAY = MONTHLY_FIXED_INVESTMENTDAY;
         this.FUND_CODE = FUND_CODE;
+        this.INDEX_CODE = index_code;
         this.PHONE_NUMBER = PHONE_NUMBER;
         this.PERCENTAGE_OF_TIME_OF_FI = PERCENTAGE_OF_TIME_OF_FI;
     }
@@ -115,7 +138,7 @@ public class Ffia {
                 Thread.sleep(3600000);
                 LOGGER.info("refresh notificationPoint");
                 //不需要那么精确,所以就不用BigDecimal了
-                this.notificationPoint = GetFundInfoUtil.getCurrentNetWorthOfFund(FUND_CODE) * PERCENTAGE_OF_TIME_OF_FI;
+                this.notificationPoint = GetFundInfoUtil.getCurrentNetWorthOfFund(FUND_CODE) * getPercentage();
                 alreadyIncreasedThisMonth = false;
             } else {
                 if ((!alreadyIncreasedThisMonth) && notificationPointReached()) {
@@ -129,6 +152,36 @@ public class Ffia {
             sleepAndExecuteCoreLogic();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * 获取指数估值
+     */
+    private String getValuations() {
+        try {
+            HttpResponse httpResponse = HttpUtil.doGet("https://danjuanapp.com", "/djapi/index_eva/detail/"
+                    + INDEX_CODE, new HashMap<>(16), new HashMap<>(16));
+            JSONObject jsonObject = JSONObject.parseObject(JSONObject.parseObject(EntityUtils
+                    .toString(httpResponse.getEntity())).getString("data"));
+            return jsonObject.getString("eva_type");
+        } catch (Exception e) {
+            return getValuations();
+        }
+    }
+
+
+    /**
+     * 获取当月估值对应的百分比
+     */
+    private double getPercentage() {
+        String valuation = getValuations();
+        if ("low".equals(valuation)) {
+            return PERCENTAGE_OF_TIME_OF_FI.percentageForLow;
+        } else if ("mid".equals(valuation)) {
+            return PERCENTAGE_OF_TIME_OF_FI.percentageForMid;
+        } else {
+            return PERCENTAGE_OF_TIME_OF_FI.percentageForHigh;
         }
     }
 

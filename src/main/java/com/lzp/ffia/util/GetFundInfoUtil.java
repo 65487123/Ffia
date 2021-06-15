@@ -35,22 +35,26 @@ public class GetFundInfoUtil {
      */
     private static String gztimeOfLastGetNetWorth;
 
-    public static double getCurrentNetWorthOfFund(String fundCode) throws Exception {
-        HttpResponse httpResponse = HttpUtil.doGet("http://fundgz.1234567.com.cn", "/js/"
-                + fundCode + ".js", new HashMap<>(16), new HashMap<>(16));
-        String[] strings = EntityUtils.toString(httpResponse.getEntity()).split(",");
-        double netWorth = 0;
-        for (String string : strings) {
-            if (string.startsWith("\"gsz\":\"")) {
-                netWorth = Double.parseDouble(string.substring(7, string.length() - 1));
-            } else if (string.startsWith("\"gztime\"")) {
-                gztimeOfLastGetNetWorth = string.substring(21, 26);
+    public static double getCurrentNetWorthOfFund(String fundCode) {
+        try {
+            HttpResponse httpResponse = HttpUtil.doGet("http://fundgz.1234567.com.cn", "/js/"
+                    + fundCode + ".js", new HashMap<>(16), new HashMap<>(16));
+            String[] strings = EntityUtils.toString(httpResponse.getEntity()).split(",");
+            double netWorth = 0;
+            for (String string : strings) {
+                if (string.startsWith("\"gsz\":\"")) {
+                    netWorth = Double.parseDouble(string.substring(7, string.length() - 1));
+                } else if (string.startsWith("\"gztime\"")) {
+                    gztimeOfLastGetNetWorth = string.substring(21, 26);
+                }
             }
-        }
-        if (netWorth == 0) {
-            throw new RuntimeException("get net worth failed");
-        } else {
-            return netWorth;
+            if (netWorth == 0) {
+                throw new RuntimeException("get net worth failed");
+            } else {
+                return netWorth;
+            }
+        } catch (Exception e) {
+            return getCurrentNetWorthOfFund(fundCode);
         }
     }
 
