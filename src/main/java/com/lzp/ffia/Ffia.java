@@ -42,12 +42,12 @@ import java.util.List;
  */
 public class Ffia {
 
-    public static class PercentageForValuations {
+    public static class PercentagesForValuations {
         private double percentageForMid;
         private double percentageForLow;
         private double percentageForHigh;
 
-        public PercentageForValuations(double percentageForMid, double percentageForLow, double percentageForHigh) {
+        public PercentagesForValuations(double percentageForMid, double percentageForLow, double percentageForHigh) {
             this.percentageForMid = percentageForMid;
             this.percentageForLow = percentageForLow;
             this.percentageForHigh = percentageForHigh;
@@ -101,10 +101,10 @@ public class Ffia {
      * <p>
      * 比如如果设为0.9998,当查出来的净值低于定投当日份额确认后的净值的0.9998就会发短信
      */
-    private final PercentageForValuations PERCENTAGE_OF_TIME_OF_FI;
+    private final PercentagesForValuations PERCENTAGE_OF_TIME_OF_FI;
 
     public Ffia(short MONTHLY_FIXED_INVESTMENTDAY, String FUND_CODE,
-                String index_code, String PHONE_NUMBER, PercentageForValuations PERCENTAGE_OF_TIME_OF_FI) {
+                String index_code, String PHONE_NUMBER, PercentagesForValuations PERCENTAGE_OF_TIME_OF_FI) {
         this.MONTHLY_FIXED_INVESTMENTDAY = MONTHLY_FIXED_INVESTMENTDAY;
         this.FUND_CODE = FUND_CODE;
         this.INDEX_CODE = index_code;
