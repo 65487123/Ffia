@@ -16,19 +16,14 @@
 
 package com.lzp.ffia;
 
-import com.alibaba.fastjson.JSONObject;
-import com.lzp.ffia.util.GetFundInfoUtil;
-import com.lzp.ffia.util.HttpUtil;
+import com.lzp.ffia.util.CrawlingUtil;
 import com.lzp.ffia.util.MessageUtil;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -137,7 +132,7 @@ public class Ffia {
                 Thread.sleep(3600000);
                 LOGGER.info("refresh notificationPoint");
                 //不需要那么精确,所以就不用BigDecimal了
-                this.notificationPoint = GetFundInfoUtil.getCurrentNetWorthOfFund(FUND_CODE) * getPercentage();
+                this.notificationPoint = CrawlingUtil.getCurrentNetWorthOfFund(FUND_CODE) * getPercentage();
                 alreadyIncreasedThisMonth = false;
             } else {
                 if ((!alreadyIncreasedThisMonth) && notificationPointReached()) {
@@ -155,26 +150,10 @@ public class Ffia {
     }
 
     /**
-     * 获取指数估值
-     */
-    private String getValuations() {
-        try {
-            HttpResponse httpResponse = HttpUtil.doGet("https://danjuanapp.com", "/djapi/index_eva/detail/"
-                    + INDEX_CODE, new HashMap<>(16), new HashMap<>(16));
-            JSONObject jsonObject = JSONObject.parseObject(JSONObject.parseObject(EntityUtils
-                    .toString(httpResponse.getEntity())).getString("data"));
-            return jsonObject.getString("eva_type");
-        } catch (Exception e) {
-            return getValuations();
-        }
-    }
-
-
-    /**
      * 获取当月估值对应的百分比
      */
     private double getPercentage() {
-        String valuation = getValuations();
+        String valuation = CrawlingUtil.getValuations(INDEX_CODE);
         if ("low".equals(valuation)) {
             return PERCENTAGE_OF_TIME_OF_FI.percentageForLow;
         } else if ("mid".equals(valuation)) {
@@ -189,8 +168,8 @@ public class Ffia {
      * 判断是否已达到需要加注的点
      */
     private boolean notificationPointReached() throws Exception {
-        double latestNetWorth = GetFundInfoUtil.getCurrentNetWorthOfFund(FUND_CODE);
-        return (!CLOSING_MOMENT.equals(GetFundInfoUtil.getGztimeOfLastGetNetWorth()))
+        double latestNetWorth = CrawlingUtil.getCurrentNetWorthOfFund(FUND_CODE);
+        return (!CLOSING_MOMENT.equals(CrawlingUtil.getGztimeOfLastGetNetWorth()))
                 && (latestNetWorth < notificationPoint);
     }
 

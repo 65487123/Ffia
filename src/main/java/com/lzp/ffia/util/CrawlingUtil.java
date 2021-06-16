@@ -16,6 +16,7 @@
 
 package com.lzp.ffia.util;
 
+import com.alibaba.fastjson.JSONObject;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 
@@ -27,7 +28,7 @@ import java.util.HashMap;
  * @author: Zeping Lu
  * @date: 2021/5/27 17:21
  */
-public class GetFundInfoUtil {
+public class CrawlingUtil {
 
 
     /**
@@ -62,5 +63,20 @@ public class GetFundInfoUtil {
         return gztimeOfLastGetNetWorth;
     }
 
+
+    /**
+     * 获取指数估值
+     */
+    public static String getValuations(String indexCode) {
+        try {
+            return JSONObject.parseObject(JSONObject.parseObject(EntityUtils
+                    .toString(HttpUtil.doGet("https://danjuanapp.com",
+                            "/djapi/index_eva/detail/" + indexCode,
+                            new HashMap<>(16), new HashMap<>(16))
+                            .getEntity())).getString("data")).getString("eva_type");
+        } catch (Exception e) {
+            return getValuations(indexCode);
+        }
+    }
 
 }
