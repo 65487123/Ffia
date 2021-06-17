@@ -21,10 +21,8 @@ import com.lzp.ffia.util.MessageUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDateTime;
+
 
 /**
  * Description:基金定投辅助
@@ -124,11 +122,11 @@ public class Ffia {
      * 睡到14.55并执行基金定投辅助核心逻辑
      */
     private void sleepAndExecuteCoreLogic() {
-        List<Short> dayHourMinAndSec = getCurrentNumOfDaysInMonth();
+        LocalDateTime localDateTime = LocalDateTime.now();
         try {
-            sleepTillTwoFiftyFive(dayHourMinAndSec.get(1), dayHourMinAndSec.get(2), dayHourMinAndSec.get(3));
+            sleepTillTwoFiftyFive((short) localDateTime.getHour(), (short) localDateTime.getMinute(), (short) localDateTime.getSecond());
             //已经睡到这一天的14.55了。或者项目启动时候就已经14.55-15.00之间了
-            if (dayHourMinAndSec.get(0) == MONTHLY_FIXED_INVESTMENTDAY) {
+            if ((short) localDateTime.getDayOfMonth() == MONTHLY_FIXED_INVESTMENTDAY) {
                 Thread.sleep(3600000);
                 LOGGER.info("refresh notificationPoint");
                 //不需要那么精确,所以就不用BigDecimal了
@@ -185,20 +183,6 @@ public class Ffia {
         } else if (curHour < 14 || curMin < 55) {
             Thread.sleep(((14 - curHour) * 3600000) + ((55 - curMin) * 60000) - (curSec * 1000));
         }
-    }
-
-    /**
-     * 获取当前时刻(以List返回,装有四个元素,分别是天、时、分、秒)
-     */
-    private List<Short> getCurrentNumOfDaysInMonth() {
-        List<Short> dayHourMinAndSec = new ArrayList<>();
-        String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z")
-                .format(new Date(System.currentTimeMillis()));
-        dayHourMinAndSec.add(Short.parseShort(time.substring(8, 10)));
-        dayHourMinAndSec.add(Short.parseShort(time.substring(11, 13)));
-        dayHourMinAndSec.add(Short.parseShort(time.substring(14, 16)));
-        dayHourMinAndSec.add(Short.parseShort(time.substring(17, 19)));
-        return dayHourMinAndSec;
     }
 
 
