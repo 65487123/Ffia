@@ -248,13 +248,12 @@ public class HttpUtil {
      *
      * @param host
      * @param path
-     * @param method
      * @param headers
      * @param querys
      * @return
      * @throws Exception
      */
-    public static HttpResponse doDelete(String host, String path, String method,
+    public static HttpResponse doDelete(String host, String path,
                                         Map<String, String> headers,
                                         Map<String, String> querys)
             throws Exception {
